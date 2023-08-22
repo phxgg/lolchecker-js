@@ -93,7 +93,6 @@ const doWork = async (password: string) => {
 }
 
 const start = async () => {
-  let i = 0;
   for (const password of passwords) {
     checkFound();
 
