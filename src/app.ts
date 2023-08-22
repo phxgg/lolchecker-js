@@ -100,13 +100,8 @@ const start = async () => {
     if (!password) continue;
     if (password.length < 8) continue;
 
-    if (i <= 52) {
-      doWork(password);
-      await sleep(500); // if you have thousands of proxies you might not even need this
-    } else {
-      break;
-    }
-    i++;
+    doWork(password);
+    await sleep(500); // if you have thousands of proxies you might not even need this
   }
 }
 
