@@ -2,7 +2,7 @@
 
 ## Installation
 
-Use **Node v18+**
+Use **Node v18+** to install the dependencies and run the script.
 
 ```bash
 $ npm install
@@ -35,7 +35,7 @@ password2
 
 ## Usage
 
-Copy `config.example.json` into `config.json` and configure with your own settings.
+Copy `src/config.example.json` into `src/config.json` and configure with your own settings.
 
 
 Run the script:
@@ -43,3 +43,5 @@ Run the script:
 ```bash
 $ npm start
 ```
+
+If the password is found, it will be printed to the console and saved into `credentials.txt`.
