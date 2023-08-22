@@ -67,18 +67,14 @@ const doWork = async (password: string) => {
       foundPassword = password;
     } catch (err: any) {
       // password probably wrong, go to next password
-      if (err instanceof AuthFailureError || err instanceof LoginFailureError) {
+      if (err instanceof AuthFailureError
+        || err instanceof LoginFailureError) {
         break;
       }
 
-      // proxy rate limited, try next proxy
-      if (err instanceof RateLimitedError) {
-        logger.error(err.message);
-        continue;
-      }
-
-      // proxy probably blacklisted, try next proxy
-      if (err instanceof SessionCookieError) {
+      // proxy rate limited, or blacklisted, try next proxy
+      if (err instanceof RateLimitedError
+        || err instanceof SessionCookieError) {
         logger.error(err.message);
         continue;
       }
