@@ -6,6 +6,11 @@ import { Logger } from "./util/Logger.js";
 import config from "./config.json" assert { type: "json" };
 import { readLines, sleep } from "./util/funcs.js";
 
+// Disable certificate validation
+// because some proxies use self-signed certificates
+// and node-fetch doesn't like that
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
 /**
  * DO NOT EDIT BELOW THIS LINE
  */
@@ -93,6 +98,7 @@ const start = async () => {
     checkFound();
 
     if (!password) continue;
+    // if (password.length !== 9) continue;
     if (password.length < 8) continue;
 
     doWork(password);

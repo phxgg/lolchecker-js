@@ -7,3 +7,4 @@ node_modules
 /dist
 /types
 /src/config.json
+credentials.txt
