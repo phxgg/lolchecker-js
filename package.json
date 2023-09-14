@@ -2,26 +2,28 @@
   "name": "lolchecker",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/app.js",
-  "types": "dist/app.d.ts",
+  "main": "src/app.js",
   "type": "module",
   "scripts": {
-    "start": "npm run build && node dist/app.js",
-    "dev": "tsx src/app.ts",
-    "watch": "tsx watch src/app.ts",
-    "build": "tsc",
+    "start": "node --no-warnings src/app.js",
+    "dev": "node src/app.js",
+    "format:check": "npx prettier src --check",
+    "format:write": "npx prettier src --write",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^20.5.1",
-    "@types/node-fetch": "^2.6.4",
-    "tsx": "^3.12.7",
-    "typescript": "^5.1.6"
+    "@babel/eslint-parser": "^7.22.15",
+    "@babel/plugin-syntax-import-assertions": "^7.22.5",
+    "eslint": "^8.2.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "3.0.3"
   },
   "dependencies": {
+    "@babel/core": "^7.22.17",
     "chalk": "^5.3.0",
     "https-proxy-agent": "^7.0.1",
     "node-fetch": "^3.3.2"

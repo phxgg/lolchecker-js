@@ -1,34 +1,34 @@
-import chalk from "chalk";
+import chalk from 'chalk';
 
 export class Logger {
-  private static instance: Logger;
+  static instance;
 
-  private constructor() {}
+  constructor() {}
 
-  public static getInstance(): Logger {
+  static getInstance() {
     if (!Logger.instance) {
       Logger.instance = new Logger();
     }
     return Logger.instance;
   }
 
-  public log(message: string): void {
+  log(message) {
     console.log(chalk.white(message));
   }
 
-  public success(message: string): void {
+  success(message) {
     console.log(chalk.green(`[SUCCESS] ${message}`));
   }
 
-  public info(message: string): void {
+  info(message) {
     console.info(chalk.cyan(`[INFO] ${message}`));
   }
 
-  public error(message: string): void {
+  error(message) {
     console.error(chalk.red(`[ERROR] ${message}`));
   }
 
-  public warn(message: string): void {
+  warn(message) {
     console.warn(chalk.yellow(`[WARN] ${message}`));
   }
 }
