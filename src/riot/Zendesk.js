@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { HttpSession } from '../http/HttpSession.js';
 import {
   AuthFailureError,
@@ -6,16 +7,15 @@ import {
   RateLimitedError,
 } from '../errors/index.js';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { Response } from 'node-fetch';
 
 export class Zendesk {
   /**
-   * 
-   * @param {string} username 
-   * @param {string} password 
-   * @param {HttpsProxyAgent<string>} proxyAgent 
+   *
+   * @param {string} username
+   * @param {string} password
+   * @param {HttpsProxyAgent<string>} proxyAgent
    */
-  constructor(username, password, proxyAgent) {
+  constructor(username, password, proxyAgent = null) {
     this.session = new HttpSession(proxyAgent);
     this.email = null;
     this.uri = null;
@@ -70,40 +70,6 @@ export class Zendesk {
     return match[1];
   }
 
-  async complete() {
-    if (!this.uri) throw new Error('No uri found');
-    const res = await this.session.get(this.uri);
-    console.log('complete', res.status);
-    if (res.status >= 300 && res.status < 400) {
-      return await this.follow(res);
-    } else {
-      return false;
-    }
-  }
-
-  /**
-   * 
-   * @param {Response} response 
-   * @returns {Promise<boolean>}
-   */
-  async follow(response) {
-    const location = response.headers.get('location');
-    if (!location) return false;
-    // if location contains 'FAILED' return false
-    console.log('follow', location);
-    console.log('follow', 'FAILED: ' + location.includes('FAILED'));
-    if (location.includes('FAILED')) return false;
-
-    const res = await this.session.get(location);
-    console.log('follow', res.status);
-    if (res.status >= 300 && res.status < 400) {
-      return await this.follow(res);
-    } else {
-      console.log('follow == 200', res.status == 200);
-      return res.status == 200;
-    }
-  }
-
   async initializeSession() {
     await this.getAsidCookie();
   }
@@ -111,6 +77,8 @@ export class Zendesk {
   async getAsidCookie() {
     const query =
       'redirect_uri=https://login.playersupport.riotgames.com/login_callback&client_id=player-support-zendesk&ui_locales=en-us%20en-us&response_type=code&scope=openid%20email';
-    await this.session.get(`https://auth.riotgames.com/authorize?${query}`);
+    const res = await this.session.getFollow(
+      `https://auth.riotgames.com/authorize?${query}`
+    );
   }
 }

@@ -1,19 +1,25 @@
+/* eslint-disable no-unused-vars */
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import fetch, { Response } from 'node-fetch';
 
 export class HttpSession {
   /**
-   * 
-   * @param {HttpsProxyAgent<string>} proxyAgent 
+   * @param {HttpsProxyAgent<string>} proxyAgent
    */
   constructor(proxyAgent) {
-    this.proxyAgent = proxyAgent;
+    this.proxyAgent = proxyAgent ?? null;
     this.cookies = new Map();
   }
 
+  /**
+   * Makes a GET request
+   * @param {string} url
+   * @param {object} headers
+   * @returns {Response} Response
+   */
   async get(url, headers = {}) {
     const res = await fetch(url, {
-      // agent: this.proxyAgent,
+      agent: this.proxyAgent,
       redirect: 'manual',
       method: 'GET',
       headers: {
@@ -26,6 +32,49 @@ export class HttpSession {
     return res;
   }
 
+  /**
+   * Makes a GET request and follows redirects. Returns the final response.
+   * @param {string} url
+   * @param {object} headers
+   * @returns {Response} Response
+   */
+  async getFollow(url, headers = {}) {
+    const res = await fetch(url, {
+      agent: this.proxyAgent,
+      redirect: 'manual',
+      method: 'GET',
+      headers: {
+        Cookie: this.stringifyCookies(),
+        ...headers,
+      },
+    });
+    this.updateCookies(res);
+
+    if (res.status >= 300 && res.status < 400) {
+      const location = res.headers.get('location');
+      if (!location) throw new Error('No location header found');
+      // check if location is relative
+      if (!location.startsWith('https')) {
+        const urlSplit = url.split('/');
+        urlSplit.pop();
+        const baseUrl = urlSplit.join('/');
+        return this.getFollow(baseUrl + '/' + location, headers);
+      } else {
+        return this.getFollow(location, headers);
+      }
+    }
+
+    return res;
+  }
+
+  /**
+   * Makes a PUT request
+   * @param {string} url
+   * @param {object} data
+   * @param {object} options
+   * @param {object} headers
+   * @returns {Response} Response
+   */
   async put(url, data, options = {}, headers = {}) {
     const res = await fetch(url, {
       agent: this.proxyAgent,
@@ -38,23 +87,8 @@ export class HttpSession {
       ...options,
       body: JSON.stringify(data),
     });
-
     this.updateCookies(res);
-    return res;
-  }
 
-  async getFollow(url, headers = {}) {
-    const res = await fetch(url, {
-      agent: this.proxyAgent,
-      redirect: 'follow',
-      method: 'GET',
-      headers: {
-        Cookie: this.stringifyCookies(),
-        ...headers,
-      },
-    });
-
-    this.updateCookies(res);
     return res;
   }
 
@@ -78,20 +112,21 @@ export class HttpSession {
       ...options,
       body: JSON.stringify(data),
     });
-
     this.updateCookies(res);
+
     return res;
   }
 
   /**
-   *
-   * @returns Stringified cookies
+   * @returns {string} Stringified cookies
    */
   stringifyCookies() {
     let result = '';
 
     for (const [key, value] of this.cookies) {
-      result += `${key}=${value}`;
+      // value till first semicolon
+      let valueTillSemicolon = value.split(';')[0];
+      result += `${key}=${valueTillSemicolon}`;
       // if it's not last index add a semicolon
       if (
         this.cookies.size - 1 !==
@@ -108,7 +143,7 @@ export class HttpSession {
    * Parses cookies from set-cookie header
    * @typedef {Map<string, string>} Cookies
    * @param {Response} response
-   * @returns Parsed cookies from set-cookie header
+   * @returns {Cookies} Parsed cookies from set-cookie header
    */
   parseSetCookie(response) {
     const cookies = new Map();
@@ -126,7 +161,7 @@ export class HttpSession {
   }
 
   /**
-   * Updates cookies
+   * Updates cookies list
    * @param {Response} response
    */
   updateCookies(response) {
