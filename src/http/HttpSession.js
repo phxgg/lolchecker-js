@@ -127,10 +127,7 @@ export class HttpSession {
       let valueTillSemicolon = value.split(';')[0];
       result += `${key}=${valueTillSemicolon}`;
       // if it's not last index add a semicolon
-      if (
-        this.cookies.size - 1 !==
-        Array.from(this.cookies.keys()).indexOf(key)
-      ) {
+      if (this.cookies.size - 1 !== Array.from(this.cookies.keys()).indexOf(key)) {
         result += '; ';
       }
     }
