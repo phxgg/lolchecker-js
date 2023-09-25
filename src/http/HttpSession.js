@@ -26,8 +26,8 @@ export class HttpSession {
         ...headers,
       },
     });
-
     this.updateCookies(res);
+
     return res;
   }
 
@@ -38,16 +38,7 @@ export class HttpSession {
    * @returns {Promise<Types.Response>} Response
    */
   async getFollow(url, headers = {}) {
-    const res = await fetch(url, {
-      agent: this.proxyAgent,
-      redirect: 'manual',
-      method: 'GET',
-      headers: {
-        Cookie: this.stringifyCookies(),
-        ...headers,
-      },
-    });
-    this.updateCookies(res);
+    const res = await this.get(url, headers);
 
     if (res.status >= 300 && res.status < 400) {
       const location = res.headers.get('location');

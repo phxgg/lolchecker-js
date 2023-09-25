@@ -50,7 +50,7 @@ export class Zendesk {
   }
 
   async getEmail() {
-    const res = await this.session.get('https://support-leagueoflegends.riotgames.com/hc/en-us/requests');
+    const res = await this.session.getFollow('https://support-leagueoflegends.riotgames.com/hc/en-us/requests');
     const body = await res.text();
     console.log(body);
     const regex = /"email":"(.*?)"/g;
