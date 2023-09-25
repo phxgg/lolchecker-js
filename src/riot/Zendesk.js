@@ -6,6 +6,9 @@ import {
   RateLimitedError,
 } from '../errors/index.js';
 import * as Types from '../typedef.js';
+import { Logger } from '../util/Logger.js';
+
+const logger = Logger.getInstance();
 
 export class Zendesk {
   /**
@@ -78,6 +81,8 @@ export class Zendesk {
   async getAsidCookie() {
     const query =
       'redirect_uri=https://login.playersupport.riotgames.com/login_callback&client_id=player-support-zendesk&ui_locales=en-us%20en-us&response_type=code&scope=openid%20email';
-    this.session.getFollow(`https://auth.riotgames.com/authorize?${query}`);
+    await this.session.getFollow(
+      `https://auth.riotgames.com/authorize?${query}`
+    );
   }
 }
