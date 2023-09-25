@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { HttpSession } from '../http/HttpSession.js';
 import {
   AuthFailureError,
@@ -6,14 +5,13 @@ import {
   LoginFailureError,
   RateLimitedError,
 } from '../errors/index.js';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import * as Types from '../typedef.js';
 
 export class Zendesk {
   /**
-   *
-   * @param {string} username
-   * @param {string} password
-   * @param {HttpsProxyAgent<string>} proxyAgent
+   * @param {string} username Username
+   * @param {string} password Password
+   * @param {Types.HttpsProxyAgent} proxyAgent Proxy agent to use for requests
    */
   constructor(username, password, proxyAgent = null) {
     this.session = new HttpSession(proxyAgent);
@@ -45,17 +43,17 @@ export class Zendesk {
     );
     const data = await res.json();
 
-    if (data?.error === 'auth_failure') throw new AuthFailureError();
-    if (data?.error === 'rate_limited') throw new RateLimitedError();
+    switch (data?.error) {
+      case 'auth_failure':
+        throw new AuthFailureError();
+      case 'rate_limited':
+        throw new RateLimitedError();
+      case 'login_failure':
+        throw new LoginFailureError();
+    }
 
     if (!this.session.cookies.has('sub')) throw new LoginFailureError();
     this.uri = data.response?.parameters?.uri;
-
-    // const complete = await this.complete();
-    // if (!complete) throw new RedirectError();
-
-    // this.email = await this.getEmail();
-    // logger.log(this.email + ' ' + this.uri)
   }
 
   async getEmail() {
@@ -70,6 +68,9 @@ export class Zendesk {
     return match[1];
   }
 
+  /**
+   * We call this function to get the necessary cookies for the zendesk login
+   */
   async initializeSession() {
     await this.getAsidCookie();
   }
@@ -77,8 +78,6 @@ export class Zendesk {
   async getAsidCookie() {
     const query =
       'redirect_uri=https://login.playersupport.riotgames.com/login_callback&client_id=player-support-zendesk&ui_locales=en-us%20en-us&response_type=code&scope=openid%20email';
-    const res = await this.session.getFollow(
-      `https://auth.riotgames.com/authorize?${query}`
-    );
+    this.session.getFollow(`https://auth.riotgames.com/authorize?${query}`);
   }
 }

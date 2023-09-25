@@ -10,7 +10,7 @@ export function readLines(path) {
     return lines;
   } catch (err) {
     logger.error(`Could not read file - ${path}`);
-    process.exit(0);
+    process.exit();
   }
 }
 

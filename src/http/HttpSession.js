@@ -1,10 +1,9 @@
-/* eslint-disable no-unused-vars */
-import { HttpsProxyAgent } from 'https-proxy-agent';
-import fetch, { Response } from 'node-fetch';
+import fetch from 'node-fetch';
+import * as Types from '../typedef.js';
 
 export class HttpSession {
   /**
-   * @param {HttpsProxyAgent<string>} proxyAgent
+   * @param {Types.HttpsProxyAgent} proxyAgent Proxy agent to use for requests
    */
   constructor(proxyAgent) {
     this.proxyAgent = proxyAgent ?? null;
@@ -13,9 +12,9 @@ export class HttpSession {
 
   /**
    * Makes a GET request
-   * @param {string} url
-   * @param {object} headers
-   * @returns {Response} Response
+   * @param {string} url URL to make the request to
+   * @param {object} headers Headers to pass to fetch
+   * @returns {Promise<Types.Response>} Response
    */
   async get(url, headers = {}) {
     const res = await fetch(url, {
@@ -34,9 +33,9 @@ export class HttpSession {
 
   /**
    * Makes a GET request and follows redirects. Returns the final response.
-   * @param {string} url
-   * @param {object} headers
-   * @returns {Response} Response
+   * @param {string} url URL to make the request to
+   * @param {object} headers Headers to pass to fetch
+   * @returns {Promise<Types.Response>} Response
    */
   async getFollow(url, headers = {}) {
     const res = await fetch(url, {
@@ -69,11 +68,11 @@ export class HttpSession {
 
   /**
    * Makes a PUT request
-   * @param {string} url
-   * @param {object} data
-   * @param {object} options
-   * @param {object} headers
-   * @returns {Response} Response
+   * @param {string} url URL to make the request to
+   * @param {object} data Data to send in the request body
+   * @param {object} options Options to pass to fetch
+   * @param {object} headers Headers to pass to fetch
+   * @returns {Promise<Types.Response>} Response
    */
   async put(url, data, options = {}, headers = {}) {
     const res = await fetch(url, {
@@ -94,11 +93,11 @@ export class HttpSession {
 
   /**
    * Makes a POST request
-   * @param {string} url
-   * @param {object} data
-   * @param {object} options
-   * @param {object} headers
-   * @returns
+   * @param {string} url URL to make the request to
+   * @param {object} data Data to send in the request body
+   * @param {object} options Options to pass to fetch
+   * @param {object} headers Headers to pass to fetch
+   * @returns {Promise<Types.Response>} Response
    */
   async post(url, data, options = {}, headers = {}) {
     const res = await fetch(url, {
@@ -141,9 +140,8 @@ export class HttpSession {
 
   /**
    * Parses cookies from set-cookie header
-   * @typedef {Map<string, string>} Cookies
-   * @param {Response} response
-   * @returns {Cookies} Parsed cookies from set-cookie header
+   * @param {Types.Response} response Response to parse cookies from
+   * @returns {Types.Cookies} Parsed cookies from set-cookie header
    */
   parseSetCookie(response) {
     const cookies = new Map();
@@ -162,7 +160,7 @@ export class HttpSession {
 
   /**
    * Updates cookies list
-   * @param {Response} response
+   * @param {Types.Response} response
    */
   updateCookies(response) {
     const cookies = this.parseSetCookie(response);
