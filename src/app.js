@@ -107,12 +107,15 @@ async function doWork(password) {
 }
 
 async function start() {
-  for (const password of passwords) {
-    checkFound();
-    if (!password || password.length < 8) continue;
-    doWork(password);
-    await sleep(2000); // if you have thousands of proxies you might not even need this
-  }
+  // for (const password of passwords) {
+  //   checkFound();
+  //   if (!password || password.length < 8) continue;
+  //   doWork(password);
+  //   await sleep(2000); // if you have thousands of proxies you might not even need this
+  // }
+  checkFound();
+  doWork(passwords[0]);
+  await sleep(2000); // if you have thousands of proxies you might not even need this
 }
 
 start();

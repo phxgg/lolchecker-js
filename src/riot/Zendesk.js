@@ -47,12 +47,23 @@ export class Zendesk {
 
     if (!this.session.cookies.has('sub')) throw new LoginFailureError();
     this.uri = data.response?.parameters?.uri;
+    if (!this.uri) throw new LoginFailureError();
+    await this.completeLoginRedirection(this.uri);
+  }
+
+  /**
+   * Complete the login process by following the redirect uri and setting the cookies
+   * FIXME: Gets stuck on cloudflare security check page
+   * @param {string} uri URI to follow
+   */
+  async completeLoginRedirection(uri) {
+    const res = await this.session.getFollow(uri);
   }
 
   async getEmail() {
     const res = await this.session.getFollow('https://support-leagueoflegends.riotgames.com/hc/en-us/requests');
     const body = await res.text();
-    console.log(body);
+    logger.warn(body);
     const regex = /"email":"(.*?)"/g;
     const match = regex.exec(body);
     if (!match) return null;
