@@ -58,7 +58,7 @@ export class Zendesk {
     if (!this.#session.cookies.has('sub')) throw new LoginFailureError();
     this.#uri = data.response?.parameters?.uri;
     if (!this.#uri) throw new LoginFailureError();
-    await this.completeLoginRedirection(this.#uri);
+    // await this.completeLoginRedirection(this.#uri);
   }
 
   /**

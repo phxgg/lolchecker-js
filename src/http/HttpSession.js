@@ -4,6 +4,7 @@ import * as Types from '../typedef.js';
 export class HttpSession {
   #proxyAgent;
   #cookies;
+  #timeout = 10;
 
   /**
    * @param {Types.HttpsProxyAgent} proxyAgent Proxy agent to use for requests
@@ -34,8 +35,12 @@ export class HttpSession {
    * @returns {Promise<Types.Response>} Response
    */
   async get(url, headers = {}) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), this.#timeout * 1000);
+
     const res = await fetch(url, {
       agent: this.#proxyAgent,
+      signal: controller.signal,
       redirect: 'manual',
       method: 'GET',
       headers: {
@@ -43,6 +48,7 @@ export class HttpSession {
         ...headers,
       },
     });
+    clearTimeout(id);
     this.updateCookies(res);
 
     return res;
@@ -83,8 +89,12 @@ export class HttpSession {
    * @returns {Promise<Types.Response>} Response
    */
   async put(url, data, options = {}, headers = {}) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), this.#timeout * 1000);
+
     const res = await fetch(url, {
       agent: this.#proxyAgent,
+      signal: controller.signal,
       method: 'PUT',
       redirect: 'manual',
       headers: {
@@ -94,6 +104,7 @@ export class HttpSession {
       ...options,
       body: JSON.stringify(data),
     });
+    clearTimeout(id);
     this.updateCookies(res);
 
     return res;
@@ -108,8 +119,12 @@ export class HttpSession {
    * @returns {Promise<Types.Response>} Response
    */
   async post(url, data, options = {}, headers = {}) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), this.#timeout * 1000);
+
     const res = await fetch(url, {
       agent: this.#proxyAgent,
+      signal: controller.signal,
       method: 'POST',
       redirect: 'manual',
       headers: {
@@ -119,6 +134,7 @@ export class HttpSession {
       ...options,
       body: JSON.stringify(data),
     });
+    clearTimeout(id);
     this.updateCookies(res);
 
     return res;

