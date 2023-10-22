@@ -99,7 +99,8 @@ async function doWork(password) {
       }
 
       // most likely a proxy error, try next proxy
-      logger.error(err);
+      console.error(err);
+      // logger.error(err);
       continue;
     }
     break;

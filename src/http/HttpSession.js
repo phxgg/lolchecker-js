@@ -2,23 +2,40 @@ import fetch from 'node-fetch';
 import * as Types from '../typedef.js';
 
 export class HttpSession {
+  #proxyAgent;
+  #cookies;
+
   /**
    * @param {Types.HttpsProxyAgent} proxyAgent Proxy agent to use for requests
    */
   constructor(proxyAgent) {
-    this.proxyAgent = proxyAgent ?? null;
-    this.cookies = new Map();
+    this.#proxyAgent = proxyAgent ?? null;
+    this.#cookies = new Map();
   }
 
   /**
-   * Makes a GET request
+   * @returns {Types.Cookies} Cookies
+   */
+  get cookies() {
+    return this.#cookies;
+  }
+
+  /**
+   * @param {Types.Cookies} cookies Cookies
+   */
+  set cookies(cookies) {
+    this.#cookies = cookies;
+  }
+
+  /**
+   * Makes a GET request.
    * @param {string} url URL to make the request to
    * @param {object} headers Headers to pass to fetch
    * @returns {Promise<Types.Response>} Response
    */
   async get(url, headers = {}) {
     const res = await fetch(url, {
-      agent: this.proxyAgent,
+      agent: this.#proxyAgent,
       redirect: 'manual',
       method: 'GET',
       headers: {
@@ -58,7 +75,7 @@ export class HttpSession {
   }
 
   /**
-   * Makes a PUT request
+   * Makes a PUT request.
    * @param {string} url URL to make the request to
    * @param {object} data Data to send in the request body
    * @param {object} options Options to pass to fetch
@@ -67,7 +84,7 @@ export class HttpSession {
    */
   async put(url, data, options = {}, headers = {}) {
     const res = await fetch(url, {
-      agent: this.proxyAgent,
+      agent: this.#proxyAgent,
       method: 'PUT',
       redirect: 'manual',
       headers: {
@@ -83,7 +100,7 @@ export class HttpSession {
   }
 
   /**
-   * Makes a POST request
+   * Makes a POST request.
    * @param {string} url URL to make the request to
    * @param {object} data Data to send in the request body
    * @param {object} options Options to pass to fetch
@@ -92,7 +109,7 @@ export class HttpSession {
    */
   async post(url, data, options = {}, headers = {}) {
     const res = await fetch(url, {
-      agent: this.proxyAgent,
+      agent: this.#proxyAgent,
       method: 'POST',
       redirect: 'manual',
       headers: {
@@ -108,6 +125,7 @@ export class HttpSession {
   }
 
   /**
+   * Returns cookies as a string.
    * @returns {string} Stringified cookies
    */
   stringifyCookies() {
@@ -127,9 +145,9 @@ export class HttpSession {
   }
 
   /**
-   * Parses cookies from set-cookie header
-   * @param {Types.Response} response Response to parse cookies from
-   * @returns {Types.Cookies} Parsed cookies from set-cookie header
+   * Parses cookies from the `set-cookie` header.
+   * @param {Types.Response} response Response object to parse cookies from
+   * @returns {Types.Cookies} Parsed cookies
    */
   parseSetCookie(response) {
     const cookies = new Map();
@@ -147,8 +165,9 @@ export class HttpSession {
   }
 
   /**
-   * Updates cookies list
-   * @param {Types.Response} response
+   * Updates the cookies map.
+   * @param {Types.Response} response Response object to parse cookies from
+   * @returns {void}
    */
   updateCookies(response) {
     const cookies = this.parseSetCookie(response);
