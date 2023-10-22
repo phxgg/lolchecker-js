@@ -120,14 +120,22 @@ async function start() {
   logger.info('Starting...');
   logger.info('Max concurrent threads: ' + config.concurrent_threads);
 
-  for (const password of passwords) {
+  /**
+   * Password validation:
+   * 1. must be at least 8 characters long
+   * 2. must contain at least one letter and one non-letter character
+   */
+  const filteredPasswords = passwords.filter((p) => {
+    return p.length >= 8 && p.match(/[a-zA-Z]/) && p.match(/[^a-zA-Z]/);
+  });
+
+  for (const password of filteredPasswords) {
     // check if threads are full and wait until one is free
     while (threads >= config.concurrent_threads) {
       await sleep(1000);
     }
 
     checkFound();
-    if (!password) continue;
     logger.info(`Number of threads: ${threads}`);
     doWork(password);
     await sleep(500); // if you have thousands of proxies you might not even need this
