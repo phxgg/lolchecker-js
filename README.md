@@ -10,6 +10,8 @@ $ npm install
 
 ## Proxy List & Pass List formats
 
+I recommend [Proxy-Cheap](https://app.proxy-cheap.com/r/UCHmnC) for proxies. It's cheap and works fine for me. You can use any proxy provider you want, but make sure to use **HTTP proxies**, and know that rotating proxies would probably work the best.
+
 Your HTTP proxy list file should be in the following formats:
 
 If it does **not** include a username and password:
