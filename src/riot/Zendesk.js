@@ -75,6 +75,7 @@ export class Zendesk {
    * Gets the email of the account. Must be logged in.
    * @returns {Promise<string>} Email
    */
+  // TODO: Probably must first call `completeLoginRedirection` before this. Haven't looked into it yet.
   async getEmail() {
     const res = await this.#session.getFollow('https://support-leagueoflegends.riotgames.com/hc/en-us/requests');
     const body = await res.text();
