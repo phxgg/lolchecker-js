@@ -1,6 +1,7 @@
 {
   "username": "LOL_ACCOUNT_USERNAME",
   "use_proxy_list": true,
+  "known_password_length": 0,
   "proxy_list_path": "PATH_TO_YOUR_PROXY_LIST.txt",
   "pass_list_path": "PATH_TO_YOUR_PASS_LIST.txt",
   "concurrent_threads": 30

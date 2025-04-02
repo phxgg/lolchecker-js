@@ -131,9 +131,20 @@ async function start() {
    * Password validation:
    * 1. must be at least 8 characters long
    * 2. must contain at least one letter and one non-letter character
+   *
+   * Note: if `known_password_length` is set in the configuration, must be exactly that length
    */
   const filteredPasswords = passwords.filter((p) => {
-    return p.length >= 8 && p.match(/[a-zA-Z]/) && p.match(/[^a-zA-Z]/);
+    // return p.length >= 8 && p.match(/[a-zA-Z]/) && p.match(/[^a-zA-Z]/);
+    let passLengthExpression = false;
+    if (config.known_password_length !== 0) {
+      passLengthExpression = p.length === config.known_password_length;
+    } else {
+      passLengthExpression = p.length >= 8;
+    }
+    const letterExpression = p.match(/[a-zA-Z]/);
+    const nonLetterExpression = p.match(/[^a-zA-Z]/);
+    return passLengthExpression && letterExpression && nonLetterExpression;
   });
 
   for (const password of filteredPasswords) {
