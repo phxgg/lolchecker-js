@@ -5,4 +5,5 @@ node_modules
 /dist
 /types
 /src/config.json
+/proxies
 credentials.txt
