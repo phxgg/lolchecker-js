@@ -3,7 +3,7 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import * as fs from 'fs';
 import { AuthFailureError, LoginFailureError, RateLimitedError, SessionCookieError } from './errors/index.js';
 import { Logger } from './util/Logger.js';
-import config from './config.json' assert { type: 'json' };
+import config from './config.json' with { type: 'json' };
 import { readLines, sleep } from './util/funcs.js';
 import * as Types from './typedef.js';
 
@@ -90,8 +90,15 @@ async function doWork(password) {
       foundPassword = password;
     } catch (err) {
       // password probably wrong, go to next password
-      if (err instanceof AuthFailureError || err instanceof LoginFailureError) {
-        logger.warn(`Password probably wrong - ${password}`);
+      if (err instanceof AuthFailureError) {
+        logger.warn(`Password wrong - ${password}`);
+        threads--;
+        break;
+      }
+
+      // login failure, go to next password
+      if (err instanceof LoginFailureError) {
+        logger.warn(`Login failure`);
         threads--;
         break;
       }

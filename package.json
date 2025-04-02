@@ -7,8 +7,7 @@
   "scripts": {
     "start": "node --no-warnings src/app.js",
     "dev": "node src/app.js",
-    "format:check": "npx prettier src --check",
-    "format:write": "npx prettier src --write",
+    "format": "npx prettier src --write",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

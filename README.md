@@ -4,7 +4,7 @@ lolchecker-js is a Node.js script that tries to bruteforce its way into a League
 
 ## Installation
 
-Use **Node v18+** to install the dependencies and run the script.
+Use **Node v22+** to install the dependencies and run the script.
 
 ```sh
 $ npm install
