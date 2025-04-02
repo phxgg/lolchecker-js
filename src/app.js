@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { AuthFailureError, LoginFailureError, RateLimitedError, SessionCookieError } from './errors/index.js';
 import { Logger } from './util/Logger.js';
 import config from './config.json' with { type: 'json' };
-import { readLines, sleep } from './util/funcs.js';
+import { readLines, readLinesStream, sleep } from './util/funcs.js';
 import * as Types from './typedef.js';
 
 // Disable certificate validation
@@ -21,7 +21,16 @@ let threads = 0;
 const logger = Logger.getInstance();
 
 // Read passlist
-const passwords = readLines(config.pass_list_path);
+// const passwords = readLines(config.pass_list_path);
+
+// Read passlist in chunks
+let passwords = [];
+async function processPassList() {
+  await readLinesStream(config.pass_list_path, (line) => {
+    passwords.push(line);
+  });
+  logger.info('Successfully processed pass list.');
+}
 
 // Read proxy list
 let proxies;
@@ -127,6 +136,9 @@ async function start() {
   logger.info('Starting...');
   logger.info('Max concurrent threads: ' + config.concurrent_threads);
 
+  logger.info('Processing pass list...');
+  await processPassList();
+
   /**
    * Password validation:
    * 1. must be at least 8 characters long
@@ -135,7 +147,6 @@ async function start() {
    * Note: if `known_password_length` is set in the configuration, must be exactly that length
    */
   const filteredPasswords = passwords.filter((p) => {
-    // return p.length >= 8 && p.match(/[a-zA-Z]/) && p.match(/[^a-zA-Z]/);
     let passLengthExpression = false;
     if (config.known_password_length !== 0) {
       passLengthExpression = p.length === config.known_password_length;
