@@ -148,7 +148,7 @@ async function start() {
    */
   const filteredPasswords = passwords.filter((p) => {
     let passLengthExpression = false;
-    if (config.known_password_length !== 0) {
+    if (config.known_password_length && config.known_password_length !== 0) {
       passLengthExpression = p.length === config.known_password_length;
     } else {
       passLengthExpression = p.length >= 8;
